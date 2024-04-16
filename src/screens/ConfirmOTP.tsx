@@ -5,8 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  NativeSyntheticEvent,
-  TextInputKeyPressEventData,
 } from 'react-native';
 import CustomButton from '../component/custom/button';
 
@@ -19,16 +17,16 @@ interface IConfirmCodeProps {
 const renderNumberConfirm = (props: IConfirmCodeProps) => {
   const {index, code, handleSetCode} = props;
   return (
-    <TouchableOpacity key={index} onPress={handleSetCode}>
+    <TouchableOpacity key={index.toString()} onPress={handleSetCode}>
       <View style={styles.confirmCode}>
-        <Text style={styles.textCode}>{code && code}</Text>
+        <Text style={styles.textCode}>{code && code.charAt(index)}</Text>
       </View>
     </TouchableOpacity>
   );
 };
 
 const ConfirmOTP = () => {
-  const [codeOPT, setCodeOPT] = useState<string[]>(['', '', '', '', '', '']);
+  const [codeOPT, setCodeOPT] = useState<string>('');
 
   const inputRef = useRef<TextInput>(null);
   const handleSetCode = () => {
@@ -38,29 +36,7 @@ const ConfirmOTP = () => {
   };
 
   const handleChangeText = (text: string) => {
-    const char = text.charAt(text.length - 1);
-    const index = text.length - 1;
-
-    if (index < 6) {
-      setCodeOPT(prev => {
-        const newCodeOPT = [...prev];
-        newCodeOPT[index] = char;
-        return newCodeOPT;
-      });
-    }
-  };
-
-  const handleKeyPress = (
-    event: NativeSyntheticEvent<TextInputKeyPressEventData>,
-  ) => {
-    if (event.nativeEvent.key === 'Backspace') {
-      const updateOTP = [...codeOPT];
-      const currentIndex = codeOPT.findIndex(item => item === '');
-
-      updateOTP[currentIndex === -1 ? codeOPT.length - 1 : currentIndex - 1] =
-        '';
-      setCodeOPT(updateOTP);
-    }
+    setCodeOPT(text);
   };
 
   return (
@@ -79,9 +55,9 @@ const ConfirmOTP = () => {
           </Text>
         </View>
         <View style={styles.wrapConfirm}>
-          {codeOPT!.map((item, index) => {
+          {new Array(6).fill(0).map((item, index) => {
             const props: IConfirmCodeProps = {
-              code: item,
+              code: codeOPT,
               index: index,
               handleSetCode: handleSetCode,
             };
@@ -94,7 +70,6 @@ const ConfirmOTP = () => {
             ref={inputRef}
             style={styles.input}
             onChangeText={handleChangeText}
-            onKeyPress={event => handleKeyPress(event)}
             keyboardType="numeric"
           />
         </View>
